@@ -1,0 +1,109 @@
+/* CustomRingApp */
+.customRingApp {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  }
+  
+  /* Ring Designer */
+  .ringDesigner {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  /* Hand Drop Area */
+  .handDropArea {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 640px;
+    height: auto;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    overflow: hidden;
+  }
+  
+  .handImage {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+  }
+  
+  /* Placed Rings */
+  .placedRing {
+    position: absolute;
+    cursor: move;
+    border-radius: 50%;
+  }
+  
+  /* Ring Item Carousel */
+  .ringCarousel {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 640px;
+  }
+  
+  .ringItem {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    border: 1px solid #ddd;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+  }
+  
+  .ringItem:hover {
+    transform: scale(1.1);
+  }
+  
+  /* Save Button */
+  .saveButton {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background-color 0.3s;
+  }
+  
+  .saveButton:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Media Queries for responsiveness */
+  @media (max-width: 768px) {
+    .ringDesigner {
+      flex-direction: column;
+    }
+  
+    .ringCarousel {
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .ringItem {
+      width: 40px;
+      height: 40px;
+    }
+  
+    .saveButton {
+      padding: 8px 16px;
+    }
+  }
+  
