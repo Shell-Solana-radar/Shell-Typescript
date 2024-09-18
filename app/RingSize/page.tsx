@@ -1,10 +1,20 @@
-"use client"
-import { useRef, useEffect, useState } from 'react';
-import Webcam from 'react-webcam';
-import * as handpose from '@tensorflow-models/handpose';
-import '@tensorflow/tfjs-backend-webgl';
-import { drawRing } from './utilities';
-import styles from './Design.module.css';
+"use client";
+import { useRef, useEffect, useState } from "react";
+import Webcam from "react-webcam";
+import * as handpose from "@tensorflow-models/handpose";
+import "@tensorflow/tfjs-backend-webgl";
+import { drawRing } from "./utilities";
+import styles from "./Design.module.css";
+import { useCluster } from "../../components/cluster/cluster-data-access";
+import { useAnchorProvider } from "../../components/solana/solana-provider";
+import { useMemo } from "react";
+import {
+  getRingInfoProgramId,
+  getRingInfoProgram,
+} from "../../components/Solana alt/solana-exports";
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { Keypair, SystemProgram } from "@solana/web3.js";
+import toast, { Toaster } from "react-hot-toast";
 
 // Type definitions
 type HandCoordinates = number[][];
@@ -14,10 +24,18 @@ const RingSizer: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const captureCanvasRef = useRef<HTMLCanvasElement | null>(null); // For captured image
   const [ringSize, setRingSize] = useState<number | null>(null);
-  const [selectedFinger, setSelectedFinger] = useState<string>('indexFinger');
-  const [handCoordinates, setHandCoordinates] = useState<HandCoordinates | null>(null);
+  const [selectedFinger, setSelectedFinger] = useState<string>("indexFinger");
+  const [handCoordinates, setHandCoordinates] =
+    useState<HandCoordinates | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null); // Store captured image
-  const [facingMode, setFacingMode] = useState<string>('user');
+  const [facingMode, setFacingMode] = useState<string>("user");
+  const provider = useAnchorProvider();
+  const { cluster } = useCluster();
+  const programId = useMemo(
+    () => getRingInfoProgramId(cluster.network),
+    [cluster],
+  );
+  const program = getRingInfoProgram(provider);
 
   // Define intrinsic camera matrix based on video resolution
   const getCameraMatrix = (videoWidth: number, videoHeight: number) => {
@@ -60,16 +78,18 @@ const RingSizer: React.FC = () => {
 
         // Get camera matrix based on video dimensions
         const K = getCameraMatrix(video.videoWidth, video.videoHeight);
-
+        console.log("K", K);
         // Detect hand landmarks
         const hands = await net.estimateHands(video);
 
         if (hands.length > 0) {
-          const calibratedHandCoordinates = hands[0].landmarks.map(([x, y, z]) => {
-            const projectedX = (K[0][0] * x + K[0][2]) / z;
-            const projectedY = (K[1][1] * y + K[1][2]) / z;
-            return [projectedX, projectedY];
-          });
+          const calibratedHandCoordinates = hands[0].landmarks.map(
+            ([x, y, z]) => {
+              const projectedX = (K[0][0] * x + K[0][2]) / z;
+              const projectedY = (K[1][1] * y + K[1][2]) / z;
+              return [projectedX, projectedY];
+            },
+          );
 
           setHandCoordinates(calibratedHandCoordinates);
 
@@ -103,7 +123,7 @@ const RingSizer: React.FC = () => {
     setCapturedImage(imageSrc || null);
 
     if (captureCanvasRef.current && imageSrc) {
-      const ctx = captureCanvasRef.current.getContext('2d');
+      const ctx = captureCanvasRef.current.getContext("2d");
       const video = webcamRef.current?.video;
 
       if (ctx && video) {
@@ -113,8 +133,19 @@ const RingSizer: React.FC = () => {
         img.src = imageSrc;
 
         img.onload = () => {
-          ctx.clearRect(0, 0, captureCanvasRef.current!.width, captureCanvasRef.current!.height);
-          ctx.drawImage(img, 0, 0, captureCanvasRef.current!.width, captureCanvasRef.current!.height);
+          ctx.clearRect(
+            0,
+            0,
+            captureCanvasRef.current!.width,
+            captureCanvasRef.current!.height,
+          );
+          ctx.drawImage(
+            img,
+            0,
+            0,
+            captureCanvasRef.current!.width,
+            captureCanvasRef.current!.height,
+          );
 
           if (handCoordinates) {
             drawRing(handCoordinates, selectedFinger, captureCanvasRef, false);
@@ -123,64 +154,117 @@ const RingSizer: React.FC = () => {
       }
     }
   };
+  const storeInfo = async () => {
+    console.log("Store Info in Blockchain");
+    console.log("Program ID", programId);
+    console.log("Program", program);
+    console.log("Provider", provider);
+
+    const customer = new Keypair();
+
+    // Generiere einen neuen Schlüssel für die RingInfo
+    await provider.connection.confirmTransaction(
+      await provider.connection.requestAirdrop(
+        customer.publicKey,
+        2 * LAMPORTS_PER_SOL,
+      ),
+    );
+
+    console.log("Customer", customer.publicKey);
+    let startBalancePlayer = await provider.connection.getBalance(
+      customer.publicKey,
+    );
+    console.log("Start balance", startBalancePlayer);
+
+    // Definiere den Namen und die Größe des Rings
+    const name = "Mona";
+
+    if (ringSize && typeof name === "string") {
+      const size: number = ringSize;
+      console.log("ringSize", typeof size);
+      console.log("name", typeof name);
+      // Führe die Transaktion zum Speichern der Ringgröße aus
+      console.log("Create ring info account");
+
+      try {
+        let tx = await program.methods
+          .storeRing(name, size)
+          .accounts({
+            signer: customer.publicKey,
+          })
+          .signers([customer])
+          .rpc();
+        toast.success("Ring size stored successfully");
+        console.log("transaction hash", tx);
+      } catch (error: any) {
+        toast.error(`Error storing ring size: ${error.message}`);
+        console.log(`Error storing ring size: ${error.message}`);
+      }
+    }
+  };
 
   // Toggle between front and back camera
   const toggleCamera = () => {
-    setFacingMode((prevMode) => (prevMode === 'user' ? 'environment' : 'user'));
+    setFacingMode((prevMode) => (prevMode === "user" ? "environment" : "user"));
   };
 
-
   return (
-    <div className={styles.container}>
-      <div className={styles.webcamContainer}>
-        <Webcam
-          ref={webcamRef}
-          screenshotFormat="image/jpeg"
-          className={styles.webcam}
-          videoConstraints={{ facingMode }} // Control the camera
-        />
-        <canvas ref={canvasRef} className={styles.overlayCanvas} />
-      </div>
+    <>
+      <div className={styles.container}>
+        <div className={styles.webcamContainer}>
+          <Webcam
+            ref={webcamRef}
+            screenshotFormat="image/jpeg"
+            className={styles.webcam}
+            videoConstraints={{ facingMode }} // Control the camera
+          />
+          <canvas ref={canvasRef} className={styles.overlayCanvas} />
+        </div>
 
-      <div className={styles.controls}>
-        <label>Select Finger:</label>
-        <select
-          onChange={(e) => setSelectedFinger(e.target.value)}
-          value={selectedFinger}
-        >
-          <option value="thumb">Thumb</option>
-          <option value="indexFinger">Index Finger</option>
-          <option value="middleFinger">Middle Finger</option>
-          <option value="ringFinger">Ring Finger</option>
-          <option value="pinky">Pinky</option>
-        </select>
+        <div className={styles.controls}>
+          <label>Select Finger:</label>
+          <select
+            onChange={(e) => setSelectedFinger(e.target.value)}
+            value={selectedFinger}
+          >
+            <option value="thumb">Thumb</option>
+            <option value="indexFinger">Index Finger</option>
+            <option value="middleFinger">Middle Finger</option>
+            <option value="ringFinger">Ring Finger</option>
+            <option value="pinky">Pinky</option>
+          </select>
 
-        {ringSize && (
-          <div className={styles.ringSize}>
-            <h3>Detected Ring Size: {ringSize}</h3>
+          {ringSize && (
+            <div className={styles.ringSize}>
+              <h3>Detected Ring Size: {ringSize}</h3>
+            </div>
+          )}
+
+          <button className={styles.captureButton} onClick={captureImage}>
+            Capture Image
+          </button>
+
+          <button className={styles.toggleCameraButton} onClick={toggleCamera}>
+            Switch Camera
+          </button>
+
+          <button className="go-to-custom-button" onClick={storeInfo}>
+            Store Info in Blockchain
+          </button>
+
+          <button className={styles.goToCustomButton}>
+            Go to Custom Hand Ring
+          </button>
+        </div>
+
+        {capturedImage && (
+          <div className={styles.capturedImageContainer}>
+            <h3>Captured Image:</h3>
+            <canvas ref={captureCanvasRef} className={styles.capturedCanvas} />
           </div>
         )}
-
-        <button className={styles.captureButton} onClick={captureImage}>
-          Capture Image
-        </button>
-
-        <button className={styles.toggleCameraButton} onClick={toggleCamera}>
-          Switch Camera
-        </button>
-
-        <button className={styles.goToCustomButton}>
-          Go to Custom Hand Ring
-        </button>
       </div>
-
-      {capturedImage && (
-        <div className={styles.capturedImageContainer}>
-          <h3>Captured Image:</h3>
-          <canvas ref={captureCanvasRef} className={styles.capturedCanvas} />
-        </div>
-      )}
-    </div>
+    </>
   );
 };
 
