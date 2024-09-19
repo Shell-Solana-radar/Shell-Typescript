@@ -3,8 +3,14 @@ import Image from "next/image";
 import Homepage from "./components/Home/Homepage";
 export default function Home() {
   return (
-    <div >
+    <div>
       <Homepage />
     </div>
   );
+
+  // import DashboardFeature from "@/components/dashboard/dashboard-feature";
+
+  // export default function Page() {
+  //   return <DashboardFeature />;
+  // >>>>>>> origin/feature/storeRing
 }
