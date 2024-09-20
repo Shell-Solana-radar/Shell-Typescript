@@ -1,5 +1,5 @@
 import phantomImg from "./phantom.png";
-import ringImg from "./ring.jpg";
+import RingImg from "./ring.jpg";
 import circularImg from "./bg_circular_lines.png";
 import cardCircleImg from "./Card Circle.png";
 import arrowImg from "./arrow.png";
@@ -9,7 +9,7 @@ import solflare_img from "./solflareImage.png";
 
 export {
   phantomImg,
-  ringImg,
+  RingImg,
   circularImg,
   cardCircleImg,
   arrowImg,

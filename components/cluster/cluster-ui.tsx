@@ -7,7 +7,9 @@ import { ReactNode, useState } from "react";
 import { AppModal } from "../ui/ui-layout";
 import { ClusterNetwork, useCluster } from "./cluster-data-access";
 import { Connection } from "@solana/web3.js";
-
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import { IconChevronDown } from "@tabler/icons-react";
+import styles from "./cluster.module.css";
 export function ExplorerLink({
   path,
   label,
@@ -63,27 +65,43 @@ export function ClusterChecker({ children }: { children: ReactNode }) {
 export function ClusterUiSelect() {
   const { clusters, setCluster, cluster } = useCluster();
   return (
-    <div className="dropdown dropdown-end">
-      <label tabIndex={0} className="btn btn-primary rounded-btn">
-        {cluster.name}
-      </label>
-      <ul
-        tabIndex={0}
-        className="menu dropdown-content z-[1] p-2 shadow bg-base-100 rounded-box w-52 mt-4"
-      >
-        {clusters.map((item) => (
-          <li key={item.name}>
-            <button
-              className={`btn btn-sm ${
-                item.active ? "btn-primary" : "btn-ghost"
-              }`}
-              onClick={() => setCluster(item)}
-            >
-              {item.name}
-            </button>
-          </li>
-        ))}
-      </ul>
+    <div className={`dropdown dropdown-end  ${styles.ClusterUiSelect}`}>
+      <Menu>
+        <MenuButton className="flex justify-center bg-purple-600 text-white px-2 py-2 mx-4 w-32 rounded-md hover:bg-purple-700">
+          <label
+            tabIndex={0}
+            className="btn btn-primary rounded-btn uppercase "
+          >
+            {cluster.name}
+          </label>{" "}
+          <IconChevronDown />
+        </MenuButton>
+        <MenuItems
+          className="bg-purple-600 text-white mt-1 rounded-md shadow-lg p-2 space-y-2"
+          anchor="bottom"
+        >
+          {" "}
+          {clusters.map((item) => (
+            <MenuItem>
+              <ul
+                tabIndex={0}
+                className="block px-4 py-2 hover:bg-purple-700 focus:bg-purple-700 rounded-md"
+              >
+                <li key={item.name}>
+                  <button
+                    className={`btn btn-sm uppercase ${
+                      item.active ? "btn-primary" : "btn-ghost"
+                    }`}
+                    onClick={() => setCluster(item)}
+                  >
+                    {item.name}
+                  </button>
+                </li>
+              </ul>
+            </MenuItem>
+          ))}
+        </MenuItems>
+      </Menu>
     </div>
   );
 }

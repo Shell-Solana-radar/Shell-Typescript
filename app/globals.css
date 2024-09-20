@@ -52,3 +52,9 @@ button {
   border-color: unset;
   border-image: unset;
 }
+
+.space-y-2> :not([hidden])~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: 0;
+  margin-bottom: calc(0.5rem* var(--tw-space-y-reverse));
+}

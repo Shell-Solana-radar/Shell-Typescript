@@ -1,0 +1,40 @@
+.UiLayout_Div .wallet_div_desktop {
+    display: flex;
+    padding: 0 1em;
+    width: 100%;
+    max-width: 400px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.wallet_div_desktop button {
+    width: 100%;
+    padding: 0.5rem 1rem;
+}
+
+/* .UiLayout_Div nav {
+    display: flex;
+    flex-direction: column;
+} */
+
+.UiLayout_Div header{
+    margin: unset;
+}
+
+@media screen and (max-width: 640px) {
+
+    .UiLayout_Div .wallet_div_desktop {
+        display: none;
+    }
+
+}
+
+
+
+@media screen and (min-width: 640px) {
+
+    .UiLayout_Div .wallet_div_mobile {
+        display: none;
+    }
+
+}
