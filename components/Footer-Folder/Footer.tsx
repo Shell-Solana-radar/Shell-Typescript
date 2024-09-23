@@ -1,5 +1,6 @@
 import React from "react";
-import { ringImg } from "@/public/assets/images";
+import { RingImg } from "@/public/assets/images";
+import Image from "next/image";
 export default function Footer() {
   return (
     <footer className="bg-white shadow dark:bg-gray-900 mt-auto">
@@ -9,7 +10,13 @@ export default function Footer() {
             href="https://flowbite.com/"
             className="flex items-center mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse"
           >
-            <img src={ringImg} className="h-8 rounded-sm" alt="AR Logo " />
+            <Image
+              src={RingImg}
+              className="h-8 rounded-sm"
+              alt="AR Logo"
+              width={200}
+              height={200}
+            />
             <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
               <p>&copy; 2024 AR Ring Sizer</p>
             </span>

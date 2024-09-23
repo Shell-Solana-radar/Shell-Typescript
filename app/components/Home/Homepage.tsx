@@ -7,6 +7,8 @@ import {
 } from "../../../public/assets/images";
 import Partners from "../PartnersMarquue/Parthners";
 import Image from "next/image";
+import { WalletButton } from "@/components/solana/solana-provider";
+
 export default function Homepage() {
   return (
     <div>
@@ -93,6 +95,7 @@ export default function Homepage() {
                 alt="phantom Img"
               />{" "}
               Sign Up with Phantom
+              {/* <WalletButton /> */}
             </button>
           </div>
         </section>{" "}

@@ -33,7 +33,7 @@ const RingSizer: React.FC = () => {
   const { cluster } = useCluster();
   const programId = useMemo(
     () => getRingInfoProgramId(cluster.network),
-    [cluster],
+    [cluster]
   );
   const program = getRingInfoProgram(provider);
 
@@ -87,7 +87,7 @@ const RingSizer: React.FC = () => {
               const projectedX = (K[0][0] * x + K[0][2]) / z;
               const projectedY = (K[1][1] * y + K[1][2]) / z;
               return [projectedX, projectedY];
-            },
+            }
           );
 
           setHandCoordinates(calibratedHandCoordinates);
@@ -136,14 +136,14 @@ const RingSizer: React.FC = () => {
             0,
             0,
             captureCanvasRef.current!.width,
-            captureCanvasRef.current!.height,
+            captureCanvasRef.current!.height
           );
           ctx.drawImage(
             img,
             0,
             0,
             captureCanvasRef.current!.width,
-            captureCanvasRef.current!.height,
+            captureCanvasRef.current!.height
           );
 
           if (handCoordinates) {
@@ -165,13 +165,13 @@ const RingSizer: React.FC = () => {
     await provider.connection.confirmTransaction(
       await provider.connection.requestAirdrop(
         customer.publicKey,
-        2 * LAMPORTS_PER_SOL,
-      ),
+        2 * LAMPORTS_PER_SOL
+      )
     );
 
     console.log("Customer", customer.publicKey);
     let startBalancePlayer = await provider.connection.getBalance(
-      customer.publicKey,
+      customer.publicKey
     );
     console.log("Start balance", startBalancePlayer);
 
@@ -207,59 +207,75 @@ const RingSizer: React.FC = () => {
     setFacingMode((prevMode) => (prevMode === "user" ? "environment" : "user"));
   };
 
+  const videoConstraints = {
+    width: 1280,
+    height: 920,
+    facingMode,
+  };
   return (
     <>
-      <div className={styles.container}>
-        <div className={styles.webcamContainer}>
-          <Webcam
-            ref={webcamRef}
-            screenshotFormat="image/jpeg"
-            className={styles.webcam}
-            videoConstraints={{ facingMode }} // Control the camera
-          />
-          <canvas ref={canvasRef} className={styles.overlayCanvas} />
+      <div className={`container mx-auto ${styles.container}`}>
+        <div className={styles.webCamDiv}>
+          <div className={styles.webcamContainer}>
+            <Webcam
+              ref={webcamRef}
+              screenshotFormat="image/jpeg"
+              className={styles.webcam}
+              audio={false}
+              width={1280}
+              height={920}
+              videoConstraints={videoConstraints}
+            />
+            <canvas ref={canvasRef} className={styles.overlayCanvas} />
+          </div>
+          <div className={styles.controls}>
+            <label>Select Finger:</label>
+            <select
+              onChange={(e) => setSelectedFinger(e.target.value)}
+              value={selectedFinger}
+            >
+              <option value="thumb">Thumb</option>
+              <option value="indexFinger">Index Finger</option>
+              <option value="middleFinger">Middle Finger</option>
+              <option value="ringFinger">Ring Finger</option>
+              <option value="pinky">Pinky</option>
+            </select>
+
+            {ringSize && (
+              <div className={styles.ringSize}>
+                <h3>Detected Ring Size: {ringSize}</h3>
+              </div>
+            )}
+
+            <button className={styles.captureButton} onClick={captureImage}>
+              Capture Image
+            </button>
+
+            <button
+              className={styles.toggleCameraButton}
+              onClick={toggleCamera}
+            >
+              Switch Camera
+            </button>
+
+            <button className="go-to-custom-button" onClick={storeInfo}>
+              Store Info in Blockchain
+            </button>
+
+            <button className={styles.goToCustomButton}>
+              Go to Custom Hand Ring
+            </button>
+          </div>
         </div>
 
-        <div className={styles.controls}>
-          <label>Select Finger:</label>
-          <select
-            onChange={(e) => setSelectedFinger(e.target.value)}
-            value={selectedFinger}
-          >
-            <option value="thumb">Thumb</option>
-            <option value="indexFinger">Index Finger</option>
-            <option value="middleFinger">Middle Finger</option>
-            <option value="ringFinger">Ring Finger</option>
-            <option value="pinky">Pinky</option>
-          </select>
-
-          {ringSize && (
-            <div className={styles.ringSize}>
-              <h3>Detected Ring Size: {ringSize}</h3>
-            </div>
-          )}
-
-          <button className={styles.captureButton} onClick={captureImage}>
-            Capture Image
-          </button>
-
-          <button className={styles.toggleCameraButton} onClick={toggleCamera}>
-            Switch Camera
-          </button>
-
-          <button className="go-to-custom-button" onClick={storeInfo}>
-            Store Info in Blockchain
-          </button>
-
-          <button className={styles.goToCustomButton}>
-            Go to Custom Hand Ring
-          </button>
-        </div>
-
-        {capturedImage && (
+        {capturedImage ? (
           <div className={styles.capturedImageContainer}>
             <h3>Captured Image:</h3>
             <canvas ref={captureCanvasRef} className={styles.capturedCanvas} />
+          </div>
+        ) : (
+          <div className={styles.capturedImageContainer}>
+            <p>Your Image will appear here </p>
           </div>
         )}
       </div>
