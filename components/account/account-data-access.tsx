@@ -13,7 +13,7 @@ import {
 } from '@solana/web3.js';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 // import toast from 'react-hot-toast';
-import toast from 'react-hot-toast/headless';
+import { toast } from "react-toastify";
 import { useTransactionToast } from '../ui/ui-layout';
 
 export function useGetBalance({ address }: { address: PublicKey }) {

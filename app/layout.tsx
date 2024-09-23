@@ -4,6 +4,9 @@ import { ClusterProvider } from "../components/cluster/cluster-data-access";
 import { SolanaProvider } from "../components/solana/solana-provider";
 import { ReactQueryProvider } from "../app/react-query-provider";
 import PrelineScript from "@/components/PrelineScript";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from "react-toastify";
+
 // import "preline";
 export const metadata = {
   title: "RingSizer",
@@ -29,6 +32,18 @@ export default function RootLayout({
           <ClusterProvider>
             <SolanaProvider>
               <UiLayout links={links}>{children}</UiLayout>
+              <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+              />
             </SolanaProvider>
           </ClusterProvider>
         </ReactQueryProvider>

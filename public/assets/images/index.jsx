@@ -6,6 +6,7 @@ import arrowImg from "./arrow.png";
 import phamtomBg_IMg from "./sol bg.png";
 import phantomBh_2 from "./phantom3506.jpg";
 import solflare_img from "./solflareImage.png";
+import NoCameraImg from "./no-camera.png";
 
 export {
   phantomImg,
@@ -16,4 +17,5 @@ export {
   phamtomBg_IMg,
   phantomBh_2,
   solflare_img,
+  NoCameraImg,
 };

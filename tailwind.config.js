@@ -17,5 +17,5 @@ module.exports = {
   theme: {
     extend: {},
   },
-  plugins: [flowbite.plugin(), `preline/plugin`],
+  plugins: [flowbite.plugin(), `preline/plugin`, `@tailwindcss/forms`],
 };

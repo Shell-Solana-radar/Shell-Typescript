@@ -11,7 +11,7 @@ import {
   ClusterUiSelect,
   ExplorerLink,
 } from "../cluster/cluster-ui";
-import toast, { Toaster } from "react-hot-toast";
+import { toast } from "react-toastify";
 // import { AccountDetailFeature } from "../account/account-ui";
 import styles from "./UiLayout.module.css";
 import { RingImg } from "@/public/assets/images";
@@ -142,12 +142,8 @@ export function UiLayout({
         >
           {children}
         </Suspense>
-        <Toaster
+        {/* <Toaster
           position="top-right"
-          reverseOrder={false}
-          gutter={8}
-          containerClassName=""
-          containerStyle={{}}
           toastOptions={{
             // Define default options
             className: "",
@@ -156,13 +152,8 @@ export function UiLayout({
               background: "#363636",
               color: "#fff",
             },
-
-            // Default options for specific types
-            success: {
-              duration: 3000,
-            },
           }}
-        />
+        /> */}
       </div>
       <Footer />
     </div>

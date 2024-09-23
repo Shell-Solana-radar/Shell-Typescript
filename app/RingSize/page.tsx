@@ -14,8 +14,9 @@ import {
 } from "../../components/Solana alt/solana-exports";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { Keypair, SystemProgram } from "@solana/web3.js";
-import toast, { Toaster } from "react-hot-toast";
-
+import { ToastContainer, toast } from "react-toastify";
+import Image from "next/image";
+import { NoCameraImg } from "@/public/assets/images";
 // Type definitions
 type HandCoordinates = number[][];
 
@@ -29,6 +30,8 @@ const RingSizer: React.FC = () => {
     useState<HandCoordinates | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null); // Store captured image
   const [facingMode, setFacingMode] = useState<string>("user");
+  const [cameraError, setCameraError] = useState<string | null>(null); // Camera permission error state
+
   const provider = useAnchorProvider();
   const { cluster } = useCluster();
   const programId = useMemo(
@@ -116,9 +119,41 @@ const RingSizer: React.FC = () => {
     }
   }, [handCoordinates, selectedFinger]);
 
+  const handleCameraError = (error: string) => {
+    setCameraError(error);
+    toast.error("Camera access denied. Please allow camera permissions.");
+  };
+  // Check camera permissions
+  const checkCameraAccess = async () => {
+    try {
+      // Try accessing the camera
+      await navigator.mediaDevices.getUserMedia({ video: true });
+      setCameraError(null); // Clear any existing error if access is granted
+    } catch (error) {
+      handleCameraError("Camera access denied.");
+    }
+  };
+
+  useEffect(() => {
+    checkCameraAccess();
+  }, []);
+
   // Capture image from the webcam and display it on a separate canvas
   const captureImage = () => {
+    if (!webcamRef.current) {
+      handleCameraError("Unable to access the camera");
+      toast.error("Camera access denied. Please allow camera permissions.");
+
+      return;
+    }
+
     const imageSrc = webcamRef.current?.getScreenshot();
+    if (!imageSrc) {
+      handleCameraError(
+        "Unable to capture image. Please allow camera permissions."
+      );
+      return;
+    }
     setCapturedImage(imageSrc || null);
 
     if (captureCanvasRef.current && imageSrc) {
@@ -204,6 +239,10 @@ const RingSizer: React.FC = () => {
 
   // Toggle between front and back camera
   const toggleCamera = () => {
+    if (!webcamRef.current) {
+      handleCameraError("Unable to access the camera");
+      return;
+    }
     setFacingMode((prevMode) => (prevMode === "user" ? "environment" : "user"));
   };
 
@@ -212,11 +251,24 @@ const RingSizer: React.FC = () => {
     height: 920,
     facingMode,
   };
+
   return (
     <>
       <div className={`container mx-auto ${styles.container}`}>
         <div className={styles.webCamDiv}>
           <div className={styles.webcamContainer}>
+            {cameraError && (
+              <div className={styles.errorMessage}>
+                <Image
+                  src={NoCameraImg}
+                  alt="NoCameraImg"
+                  width={300}
+                  height={300}
+                />
+                <p>Cannot capture image without camera permission.</p>
+              </div>
+            )}
+
             <Webcam
               ref={webcamRef}
               screenshotFormat="image/jpeg"
@@ -229,42 +281,73 @@ const RingSizer: React.FC = () => {
             <canvas ref={canvasRef} className={styles.overlayCanvas} />
           </div>
           <div className={styles.controls}>
-            <label>Select Finger:</label>
-            <select
-              onChange={(e) => setSelectedFinger(e.target.value)}
-              value={selectedFinger}
-            >
-              <option value="thumb">Thumb</option>
-              <option value="indexFinger">Index Finger</option>
-              <option value="middleFinger">Middle Finger</option>
-              <option value="ringFinger">Ring Finger</option>
-              <option value="pinky">Pinky</option>
-            </select>
-
-            {ringSize && (
-              <div className={styles.ringSize}>
-                <h3>Detected Ring Size: {ringSize}</h3>
+            <div className={styles.fingerDiv}>
+              <div>
+                <div>
+                  <label
+                    htmlFor="select-2"
+                    className="block text-sm font-medium mb-2 dark:text-white"
+                  >
+                    Select Finger:
+                  </label>
+                  <div className="relative">
+                    <select
+                      onChange={(e) => setSelectedFinger(e.target.value)}
+                      value={selectedFinger}
+                      id="select-2"
+                      className="py-3 px-4 pe-16 block w-full border-teal-500 rounded-lg text-sm focus:border-teal-500 focus:ring-teal-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:focus:ring-neutral-600"
+                    >
+                      <option value="thumb">Thumb</option>
+                      <option value="indexFinger">Index Finger</option>
+                      <option value="middleFinger">Middle Finger</option>
+                      <option value="ringFinger">Ring Finger</option>
+                      <option value="pinky">Pinky</option>
+                    </select>
+                    <div className="absolute inset-y-0 end-0 flex items-center pointer-events-none pe-8">
+                      <svg
+                        className="shrink-0 size-4 text-teal-500"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width={24}
+                        height={24}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
               </div>
-            )}
+            </div>
 
-            <button className={styles.captureButton} onClick={captureImage}>
-              Capture Image
-            </button>
+            <div className={styles.ringSize}>
+              <h3>
+                Detected Ring Size: <span>{ringSize ? ringSize : 0}</span>
+              </h3>
+            </div>
 
-            <button
-              className={styles.toggleCameraButton}
-              onClick={toggleCamera}
-            >
-              Switch Camera
-            </button>
+            <div className={styles.buttonDiv}>
+              <button className={styles.captureButton} onClick={captureImage}>
+                Capture Image
+              </button>
 
-            <button className="go-to-custom-button" onClick={storeInfo}>
-              Store Info in Blockchain
-            </button>
+              <button
+                className={styles.toggleCameraButton}
+                onClick={toggleCamera}
+              >
+                Switch Camera
+              </button>
 
-            <button className={styles.goToCustomButton}>
-              Go to Custom Hand Ring
-            </button>
+              <button className={styles.storeInfoButton} onClick={storeInfo}>
+                Store Info in Blockchain
+              </button>
+
+          
+            </div>
           </div>
         </div>
 

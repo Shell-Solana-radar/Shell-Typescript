@@ -30,12 +30,13 @@
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.3.1",
     "react-fast-marquee": "^1.6.5",
-    "react-hot-toast": "^2.4.1",
     "react-rnd": "^10.4.12",
+    "react-toastify": "^10.0.5",
     "react-webcam": "^7.2.0",
     "sol-shell": "file:"
   },
   "devDependencies": {
+    "@tailwindcss/forms": "^0.5.9",
     "@types/node": "^20.16.5",
     "@types/react": "^18.3.7",
     "@types/react-dom": "^18.3.0",

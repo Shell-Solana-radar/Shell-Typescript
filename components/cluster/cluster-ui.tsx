@@ -10,7 +10,8 @@ import { Connection } from "@solana/web3.js";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { IconChevronDown } from "@tabler/icons-react";
 import styles from "./cluster.module.css";
-import toast from "react-hot-toast";
+import { toast } from 'react-toastify';
+
 import { Button, Modal } from "flowbite-react";
 
 export function ExplorerLink({
