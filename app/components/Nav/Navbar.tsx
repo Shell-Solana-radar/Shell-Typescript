@@ -1,5 +1,6 @@
 import React from "react";
-import { ringImg } from "../../assets/images";
+import { RingImg } from "@/public/assets/images";
+import Image from "next/image";
 export default function Navbar() {
   return (
     <div>
@@ -12,10 +13,12 @@ export default function Navbar() {
               aria-label="Brand"
             >
               <span className="inline-flex items-center gap-x-2 text-xl font-semibold dark:text-white">
-                <img
+                <Image
                   className="w-10 h-auto rounded-full"
-                  src={ringImg}
+                  src={RingImg}
                   alt="Logo"
+                  width={300}
+                  height={300}
                 />
                 AR
               </span>
